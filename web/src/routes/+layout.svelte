@@ -3,6 +3,7 @@
   import { Bell, ScanEye, Server, Settings } from '@lucide/svelte';
   import { onMount, type Snippet } from 'svelte';
   import { pwaInfo } from 'virtual:pwa-info';
+  import { afterNavigate } from '$app/navigation';
   import { page } from '$app/state';
   import { app } from '$lib/app.svelte';
   import ConfirmSheet from '$lib/components/ConfirmSheet.svelte';
@@ -15,6 +16,12 @@
   let { children }: { children: Snippet } = $props();
 
   const manifestLink = $derived(pwaInfo ? pwaInfo.webManifest.linkTag : '');
+
+  let scroller: HTMLElement | undefined = $state();
+  /** Content scrolls inside `main`, not the window, so reset it on new pages. */
+  afterNavigate(({ type }) => {
+    if (type !== 'popstate') scroller?.scrollTo({ top: 0 });
+  });
 
   onMount(() => {
     app.start();
@@ -50,33 +57,35 @@
   {@html manifestLink}
 </svelte:head>
 
-<header class={mode}>
-  <a href="/" class="brand" aria-label="Screen Remote">
-    <img src="/icons/icon.svg" alt="" width="24" height="24" />
-    <span>Screen Remote</span>
-  </a>
-  <ModeIndicator {mode} />
-  <div class="spacer"></div>
-  <ShowModeToggle />
-</header>
-
-<main>
-  {@render children()}
-</main>
-
-<nav>
-  {#each nav as item (item.href)}
-    <a href={item.href} class:active={active(item.href)}>
-      <span class="icon">
-        <item.icon size={22} />
-        {#if item.href === '/alerts' && alertCount > 0}
-          <span class="badge" class:critical>{alertCount}</span>
-        {/if}
-      </span>
-      <span>{item.label}</span>
+<div class="shell">
+  <header class={mode}>
+    <a href="/" class="brand" aria-label="Screen Remote">
+      <img src="/icons/icon.svg" alt="" width="24" height="24" />
+      <span>Screen Remote</span>
     </a>
-  {/each}
-</nav>
+    <ModeIndicator {mode} />
+    <div class="spacer"></div>
+    <ShowModeToggle />
+  </header>
+
+  <main bind:this={scroller}>
+    {@render children()}
+  </main>
+
+  <nav>
+    {#each nav as item (item.href)}
+      <a href={item.href} class:active={active(item.href)}>
+        <span class="icon">
+          <item.icon size={22} />
+          {#if item.href === '/alerts' && alertCount > 0}
+            <span class="badge" class:critical>{alertCount}</span>
+          {/if}
+        </span>
+        <span>{item.label}</span>
+      </a>
+    {/each}
+  </nav>
+</div>
 
 <PinSheet />
 <ConfirmSheet />
@@ -84,9 +93,24 @@
 <Toasts />
 
 <style>
+  /*
+   * The app is a fixed full-screen frame: header, scrolling content, nav. Bottom-fixed elements
+   * drift above the screen edge in iOS home-screen apps, so the nav is laid out, not fixed.
+   */
+  .shell {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  main {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
   header {
-    position: sticky;
-    top: 0;
+    flex-shrink: 0;
     z-index: 20;
     display: flex;
     align-items: center;
@@ -130,17 +154,13 @@
     }
   }
   nav {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    flex-shrink: 0;
     z-index: 20;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     height: calc(var(--nav-h) + var(--safe-bottom));
     padding-bottom: var(--safe-bottom);
-    background: rgba(21, 25, 30, 0.96);
-    backdrop-filter: blur(8px);
+    background: var(--surface);
     border-top: 1px solid var(--border);
   }
   nav a {

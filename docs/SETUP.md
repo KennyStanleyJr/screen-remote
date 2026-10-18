@@ -67,23 +67,20 @@ writing, open the settings (**Edit settings** or the gear icon) and:
 
 Write the card, put it in the Pi and power it on. Give it a minute or two to boot.
 
-### 2. Copy the code to the Pi
+### 2. Get the code onto the Pi
 
-On your laptop, in the project folder:
+SSH in (use the username you chose; if `screenremote.local` isn't found, use the Pi's IP address
+from your router's client list), then clone the repo:
 
 ```bash
-npm run bundle
-scp screen-remote.tgz tech@screenremote.local:~
+ssh tech@screenremote.local
+sudo apt-get install -y git
+git clone https://github.com/KennyStanleyJr/screen-remote.git ~/screen-remote
 ```
-
-Use the username you chose. If `screenremote.local` isn't found, use the Pi's IP address from your
-router's client list.
 
 ### 3. Run the installer
 
 ```bash
-ssh tech@screenremote.local
-mkdir -p ~/screen-remote && tar -xzf ~/screen-remote.tgz -C ~/screen-remote
 cd ~/screen-remote
 sudo bash scripts/install-pi.sh
 ```
@@ -142,14 +139,19 @@ To stop it starting at boot (for example to use the Pi for something else), run
 
 ### Updating later
 
-Run `npm run bundle` and `scp` again, then on the Pi:
+Push your changes to GitHub from your laptop, then on the Pi (it needs internet for this):
 
 ```bash
-tar -xzf ~/screen-remote.tgz -C ~/screen-remote
-cd ~/screen-remote && sudo bash scripts/install-pi.sh
+cd ~/screen-remote && git pull && sudo bash scripts/install-pi.sh
 ```
 
-Your PIN, certificates, processor names and settings are kept.
+Your PIN, certificates, processor names and settings are kept. Reload the app on each phone
+afterwards; an installed app picks up the new version the next time it opens.
+
+**No internet at the Pi?** On your laptop run `npm run bundle` and
+`scp screen-remote.tgz tech@screenremote.local:~`, then on the Pi run
+`tar -xzf ~/screen-remote.tgz -C ~/screen-remote` and the installer as above. The installer
+itself still needs internet the first time, to download Node.js and packages.
 
 ### Useful commands
 

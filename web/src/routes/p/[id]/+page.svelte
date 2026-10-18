@@ -223,7 +223,7 @@
   }
   .tabs {
     position: sticky;
-    top: 57px;
+    top: 0;
     z-index: 10;
     display: flex;
     gap: 2px;
