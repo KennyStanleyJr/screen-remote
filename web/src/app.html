@@ -6,7 +6,9 @@
     <meta name="theme-color" content="#0e1013" />
     <meta name="color-scheme" content="dark" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- Not black-translucent: iOS then gives home-screen apps a viewport ~59pt short of the
+         screen, with an unpaintable strip under the nav. Read at install time only. -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Screen Remote" />
     <link rel="icon" href="%sveltekit.assets%/icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="%sveltekit.assets%/icons/apple-touch-icon-180x180.png" />
