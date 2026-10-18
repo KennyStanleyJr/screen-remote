@@ -103,6 +103,17 @@
     display: flex;
     flex-direction: column;
   }
+  /*
+   * Installed apps: iOS sometimes reports a viewport shorter than the screen (after resuming or
+   * closing the keyboard), leaving a gap under the nav. Size to the full screen height instead.
+   */
+  @media (display-mode: standalone) {
+    .shell {
+      bottom: auto;
+      height: 100vh;
+      height: 100lvh;
+    }
+  }
   main {
     flex: 1;
     min-height: 0;
