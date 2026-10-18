@@ -21,7 +21,7 @@ function serveCaCert(app: FastifyInstance): void {
       return reply.code(404).send('No CA certificate configured');
     return reply
       .header('Content-Type', 'application/x-x509-ca-cert')
-      .header('Content-Disposition', 'attachment; filename="showremote-rootCA.pem"')
+      .header('Content-Disposition', 'attachment; filename="screenremote-rootCA.pem"')
       .send(readFileSync(env.caCert));
   });
 }
@@ -72,13 +72,13 @@ export async function buildRedirectApp(): Promise<FastifyInstance> {
   app.get('/certs', async (_req, reply) =>
     reply.type('text/html').send(
       `<!doctype html><meta name="viewport" content="width=device-width"><body style="font-family:system-ui;background:#0e1013;color:#e8eaed;padding:24px">
-<h2>Show Remote certificate</h2><p>Install this certificate once per phone so it trusts Show Remote.</p>
+<h2>Screen Remote certificate</h2><p>Install this certificate once per phone so it trusts Screen Remote.</p>
 <p><a style="color:#7cb7ff" href="/certs/rootCA.pem">Download certificate</a></p>
-<p>Then open <a style="color:#7cb7ff" href="https://showremote.local/">https://showremote.local</a></p></body>`,
+<p>Then open <a style="color:#7cb7ff" href="https://screenremote.local/">https://screenremote.local</a></p></body>`,
     ),
   );
   app.setNotFoundHandler((req, reply) => {
-    const host = (req.headers.host ?? 'showremote.local').replace(/:\d+$/, '');
+    const host = (req.headers.host ?? 'screenremote.local').replace(/:\d+$/, '');
     const port = env.port === 443 ? '' : `:${env.port}`;
     return reply.redirect(`https://${host}${port}${req.url}`, 301);
   });

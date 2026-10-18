@@ -5,7 +5,7 @@ build/
 data/
 data-dev/
 certs/
-show-remote.tgz
+screen-remote.tgz
 *.log
 .env
 .env.*

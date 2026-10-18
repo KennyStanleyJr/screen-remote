@@ -1,4 +1,4 @@
-# Show Remote
+# Screen Remote
 
 Monitor and set up Brompton Tessera processors from your phone. A Raspberry Pi on the processor
 network finds every processor, shows failover pairs and problems at a glance, and runs setup

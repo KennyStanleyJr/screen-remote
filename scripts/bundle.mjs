@@ -1,4 +1,4 @@
-// Packs the source into show-remote.tgz for copying to a Raspberry Pi (see docs/SETUP.md).
+// Packs the source into screen-remote.tgz for copying to a Raspberry Pi (see docs/SETUP.md).
 // Usage: npm run bundle
 import { spawnSync } from 'node:child_process';
 import { statSync } from 'node:fs';
@@ -6,7 +6,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const out = 'show-remote.tgz';
+const out = 'screen-remote.tgz';
 const exclude = [
   out,
   '.git',

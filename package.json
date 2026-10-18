@@ -2,7 +2,7 @@
   "name": "screen-remote",
   "private": true,
   "version": "0.1.0",
-  "description": "Show Remote - monitor and set up Brompton Tessera processors from a phone",
+  "description": "Screen Remote - monitor and set up Brompton Tessera processors from a phone",
   "type": "module",
   "workspaces": [
     "shared",

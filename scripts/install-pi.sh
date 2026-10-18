@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Installs or updates Show Remote on a Raspberry Pi (64-bit Raspberry Pi OS Bookworm or newer).
+# Installs or updates Screen Remote on a Raspberry Pi (64-bit Raspberry Pi OS Bookworm or newer).
 #
 #   cd ~/screen-remote
 #   sudo bash scripts/install-pi.sh
@@ -7,7 +7,7 @@
 # Safe to run again after updating the code: the setup PIN, certificates and saved state are kept.
 #
 # Options (environment variables):
-#   SR_HOSTNAME=showremote   mDNS name, gives https://showremote.local
+#   SR_HOSTNAME=screenremote   mDNS name, gives https://screenremote.local
 #   SR_FIREWALL=1            set to 0 to leave the firewall alone
 #   SR_PIN=123456            set the setup PIN without prompting (only used if none is set)
 #   SR_ETH=eth0              wired interface that faces the processor network
@@ -16,17 +16,17 @@
 #                            so it can reach processors on networks without DHCP. "" to skip.
 set -euo pipefail
 
-HOSTNAME_NEW="${SR_HOSTNAME:-showremote}"
+HOSTNAME_NEW="${SR_HOSTNAME:-screenremote}"
 FIREWALL="${SR_FIREWALL:-1}"
 ETH="${SR_ETH:-eth0}"
 STATIC_IPS="${SR_STATIC_IPS-192.168.0.250/24 192.168.1.250/24}"
-NM_PROFILE=show-remote-wired
-APP_DIR=/opt/show-remote
-DATA_DIR=/var/lib/show-remote
-CONF_DIR=/etc/show-remote
+NM_PROFILE=screen-remote-wired
+APP_DIR=/opt/screen-remote
+DATA_DIR=/var/lib/screen-remote
+CONF_DIR=/etc/screen-remote
 CERT_DIR="$CONF_DIR/certs"
 CA_DIR="$CONF_DIR/ca"
-SERVICE_USER=showremote
+SERVICE_USER=screenremote
 NODE_MAJOR_MIN=20
 SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_USER="${SUDO_USER:-root}"
@@ -132,7 +132,7 @@ if pin_set; then
   echo "A setup PIN is already set. Change it in the app (Settings)."
 else
   # The running server saves its in-memory state on shutdown, which would undo the new PIN.
-  systemctl stop show-remote 2>/dev/null || true
+  systemctl stop screen-remote 2>/dev/null || true
   until sudo -u "$SERVICE_USER" DATA_DIR="$DATA_DIR" node "$APP_DIR/server/dist/cli/set-pin.js" ${SR_PIN:-}; do
     [[ -n "${SR_PIN:-}" ]] && exit 1
     echo "Try again."
@@ -140,9 +140,9 @@ else
 fi
 
 step "systemd service"
-cat >/etc/systemd/system/show-remote.service <<EOF
+cat >/etc/systemd/system/screen-remote.service <<EOF
 [Unit]
-Description=Show Remote (Brompton processor monitor)
+Description=Screen Remote (Brompton processor monitor)
 After=network-online.target avahi-daemon.service
 Wants=network-online.target
 # Never give up restarting, however many times it fails in a row.
@@ -178,8 +178,8 @@ ReadWritePaths=${DATA_DIR}
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
-systemctl enable show-remote >/dev/null
-systemctl restart show-remote
+systemctl enable screen-remote >/dev/null
+systemctl restart screen-remote
 
 if [[ "$FIREWALL" == "1" ]]; then
   step "Firewall (SSH, HTTP, HTTPS, mDNS only)"
@@ -195,7 +195,7 @@ if [[ "$FIREWALL" == "1" ]]; then
 fi
 
 step "Start on power-up"
-boot_units=(show-remote avahi-daemon)
+boot_units=(screen-remote avahi-daemon)
 command -v nmcli >/dev/null && boot_units+=(NetworkManager)
 [[ "$FIREWALL" == "1" ]] && boot_units+=(ufw)
 for unit in "${boot_units[@]}"; do
@@ -214,7 +214,7 @@ for _ in $(seq 1 15); do
 done
 if [[ "$healthy" == "1" ]]; then
   step "Done"
-  echo "Show Remote is running. From now on it starts by itself whenever the Pi is powered on."
+  echo "Screen Remote is running. From now on it starts by itself whenever the Pi is powered on."
   echo "Addresses now:  $(hostname -I)"
   [[ ${#static_addrs[@]} -gt 0 ]] && echo "After reboot also: ${static_addrs[*]}"
   echo
@@ -222,8 +222,8 @@ if [[ "$healthy" == "1" ]]; then
   echo "  1. sudo reboot   (applies the hostname and fixed addresses)"
   echo "  2. On a phone on the show Wi-Fi: http://${HOSTNAME_NEW}.local/certs  (once per phone)"
   echo "  3. Then open https://${HOSTNAME_NEW}.local"
-  echo "Logs: journalctl -u show-remote -f"
+  echo "Logs: journalctl -u screen-remote -f"
 else
-  warn "Show Remote did not come up. Check: journalctl -u show-remote -n 50"
+  warn "Screen Remote did not come up. Check: journalctl -u screen-remote -n 50"
   exit 1
 fi

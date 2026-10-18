@@ -21,7 +21,7 @@
   let step = $state(0);
   let auto = $state(false);
   let seconds = $state(6);
-  const FRAME_KEY = 'showremote.check.extraFrame';
+  const FRAME_KEY = 'screenremote.check.extraFrame';
   const savedFrame = Number(localStorage.getItem(FRAME_KEY) ?? NaN);
   /** Optional stored frame (e.g. an LDM map) shown as the last step. Remembered on this device. */
   let extraFrame = $state<number | null>(Number.isInteger(savedFrame) ? savedFrame : null);

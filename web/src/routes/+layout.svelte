@@ -51,9 +51,9 @@
 </svelte:head>
 
 <header class={mode}>
-  <a href="/" class="brand" aria-label="Show Remote">
+  <a href="/" class="brand" aria-label="Screen Remote">
     <img src="/icons/icon.svg" alt="" width="24" height="24" />
-    <span>Show Remote</span>
+    <span>Screen Remote</span>
   </a>
   <ModeIndicator {mode} />
   <div class="spacer"></div>

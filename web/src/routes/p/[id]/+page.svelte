@@ -60,7 +60,7 @@
     if (!proc || !(await app.unlock())) return;
     const label = await ui.askText(
       'Rename processor',
-      'Name shown in Show Remote',
+      'Name shown in Screen Remote',
       displayName(proc),
     );
     if (label === null) return;

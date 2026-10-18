@@ -1,4 +1,4 @@
-# Show Remote setup
+# Screen Remote setup
 
 ## What you need
 
@@ -33,7 +33,7 @@ Remote but not the processors. This is not needed to get started.
 
 ## Processors
 
-Show Remote uses the Tessera HTTP API (port 80).
+Screen Remote uses the Tessera HTTP API (port 80).
 
 - On each processor, enable **IP Control** in the **Live Control** tile.
 - Give the processors fixed IP addresses, or DHCP reservations, so they stay put during a show.
@@ -60,7 +60,7 @@ Do this at the shop, where the Pi has internet. It takes about 10 to 15 minutes.
 In **Raspberry Pi Imager**, choose your Pi model and **Raspberry Pi OS Lite (64-bit)**. Before
 writing, open the settings (**Edit settings** or the gear icon) and:
 
-- Set the **hostname** to `showremote`, so the Pi is `showremote.local` from the first boot.
+- Set the **hostname** to `screenremote`, so the Pi is `screenremote.local` from the first boot.
 - Set a **username and password** (for example `tech`).
 - Set up **Wi-Fi** for your shop network, so the Pi has internet for the install.
 - On the **Services** tab, **enable SSH** with password authentication.
@@ -73,17 +73,17 @@ On your laptop, in the project folder:
 
 ```bash
 npm run bundle
-scp show-remote.tgz tech@showremote.local:~
+scp screen-remote.tgz tech@screenremote.local:~
 ```
 
-Use the username you chose. If `showremote.local` isn't found, use the Pi's IP address from your
+Use the username you chose. If `screenremote.local` isn't found, use the Pi's IP address from your
 router's client list.
 
 ### 3. Run the installer
 
 ```bash
-ssh tech@showremote.local
-mkdir -p ~/screen-remote && tar -xzf ~/show-remote.tgz -C ~/screen-remote
+ssh tech@screenremote.local
+mkdir -p ~/screen-remote && tar -xzf ~/screen-remote.tgz -C ~/screen-remote
 cd ~/screen-remote
 sudo bash scripts/install-pi.sh
 ```
@@ -91,12 +91,12 @@ sudo bash scripts/install-pi.sh
 The installer:
 
 - Installs Node.js and the system packages it needs, then builds the app.
-- Makes sure the Pi is named `showremote` (it renames it if you skipped that in Imager).
+- Makes sure the Pi is named `screenremote` (it renames it if you skipped that in Imager).
 - Adds the fixed ethernet addresses (see above).
 - Makes the HTTPS certificate.
 - Asks you to choose the **setup PIN** (4 to 8 digits). Write it down somewhere safe.
 - Turns on a firewall that allows only SSH, HTTP, HTTPS and mDNS.
-- Starts the `show-remote` service, which also starts on every boot.
+- Starts the `screen-remote` service, which also starts on every boot.
 - Checks the app is answering, then prints **Done**.
 
 ### 4. Reboot and check
@@ -106,10 +106,10 @@ sudo reboot
 ```
 
 This applies the fixed ethernet addresses. After the reboot, SSH back in with
-`ssh tech@showremote.local` and check:
+`ssh tech@screenremote.local` and check:
 
 ```bash
-systemctl status show-remote   # should say "active (running)"
+systemctl status screen-remote   # should say "active (running)"
 ip -4 addr show eth0           # should list 192.168.0.250 and 192.168.1.250
 ```
 
@@ -119,8 +119,8 @@ appear within a minute or two.
 ### 5. Starting on power-up
 
 There is nothing to start by hand. The installer sets everything to start on its own whenever the
-Pi gets power: the network setup, the `showremote.local` name, the firewall and Show Remote itself.
-If Show Remote ever stops or crashes, it restarts within a few seconds, as many times as needed.
+Pi gets power: the network setup, the `screenremote.local` name, the firewall and Screen Remote itself.
+If Screen Remote ever stops or crashes, it restarts within a few seconds, as many times as needed.
 It always comes up in Show Mode.
 
 To check it once:
@@ -128,24 +128,24 @@ To check it once:
 1. Pull the Pi's power, wait a few seconds and plug it back in. There's no need to shut it down
    first.
 2. Wait about a minute.
-3. Open `https://showremote.local` on a phone. The app should load and show your processors.
+3. Open `https://screenremote.local` on a phone. The app should load and show your processors.
 
 To confirm from SSH that everything is set to start at boot:
 
 ```bash
-systemctl is-enabled show-remote avahi-daemon NetworkManager ufw   # each should say "enabled"
+systemctl is-enabled screen-remote avahi-daemon NetworkManager ufw   # each should say "enabled"
 ```
 
 To stop it starting at boot (for example to use the Pi for something else), run
-`sudo systemctl disable --now show-remote`. Turn it back on with
-`sudo systemctl enable --now show-remote`.
+`sudo systemctl disable --now screen-remote`. Turn it back on with
+`sudo systemctl enable --now screen-remote`.
 
 ### Updating later
 
 Run `npm run bundle` and `scp` again, then on the Pi:
 
 ```bash
-tar -xzf ~/show-remote.tgz -C ~/screen-remote
+tar -xzf ~/screen-remote.tgz -C ~/screen-remote
 cd ~/screen-remote && sudo bash scripts/install-pi.sh
 ```
 
@@ -153,45 +153,45 @@ Your PIN, certificates, processor names and settings are kept.
 
 ### Useful commands
 
-| What               | Command                                                                       |
-| ------------------ | ----------------------------------------------------------------------------- |
-| Live logs          | `journalctl -u show-remote -f`                                                |
-| Restart            | `sudo systemctl restart show-remote`                                          |
-| Reset a lost PIN   | See below                                                                     |
-| More detailed logs | add `Environment=LOG_LEVEL=info` to `/etc/systemd/system/show-remote.service` |
+| What               | Command                                                                         |
+| ------------------ | ------------------------------------------------------------------------------- |
+| Live logs          | `journalctl -u screen-remote -f`                                                |
+| Restart            | `sudo systemctl restart screen-remote`                                          |
+| Reset a lost PIN   | See below                                                                       |
+| More detailed logs | add `Environment=LOG_LEVEL=info` to `/etc/systemd/system/screen-remote.service` |
 
 To reset a lost PIN, stop the service first, or it will write the old PIN back when it stops:
 
 ```bash
-sudo systemctl stop show-remote
-sudo -u showremote DATA_DIR=/var/lib/show-remote node /opt/show-remote/server/dist/cli/set-pin.js
-sudo systemctl start show-remote
+sudo systemctl stop screen-remote
+sudo -u screenremote DATA_DIR=/var/lib/screen-remote node /opt/screen-remote/server/dist/cli/set-pin.js
+sudo systemctl start screen-remote
 ```
 
 ## Set up each phone (once)
 
-The phone needs to trust Show Remote's certificate. Without that, the app shows a security warning
+The phone needs to trust Screen Remote's certificate. Without that, the app shows a security warning
 and can't be installed to the home screen.
 
 ### iPhone
 
-1. Join the show Wi-Fi and open **http://showremote.local/certs** in **Safari**.
+1. Join the show Wi-Fi and open **http://screenremote.local/certs** in **Safari**.
 2. Tap **Download certificate** and allow the profile download.
-3. Go to **Settings → General → VPN & Device Management**, tap the Show Remote profile, and tap
+3. Go to **Settings → General → VPN & Device Management**, tap the Screen Remote profile, and tap
    **Install**.
 4. Go to **Settings → General → About → Certificate Trust Settings** and turn on the mkcert
    certificate.
-5. Open **https://showremote.local**, tap **Share → Add to Home Screen**.
+5. Open **https://screenremote.local**, tap **Share → Add to Home Screen**.
 
 ### Android
 
-1. Join the show Wi-Fi and open **http://showremote.local/certs** in **Chrome**.
+1. Join the show Wi-Fi and open **http://screenremote.local/certs** in **Chrome**.
 2. Tap **Download certificate**.
 3. Go to **Settings → Security → More security settings → Install a certificate → CA certificate**
    and pick the downloaded file. The exact menu names vary by phone.
-4. Open **https://showremote.local** and choose **Install app** from the Chrome menu.
+4. Open **https://screenremote.local** and choose **Install app** from the Chrome menu.
 
-If `showremote.local` doesn't resolve (some older Android phones), use the Pi's IP address instead,
+If `screenremote.local` doesn't resolve (some older Android phones), use the Pi's IP address instead,
 for example `https://192.168.0.250` or `https://192.168.1.250`. The certificate covers the fixed
 addresses and whatever addresses the Pi had when you ran the installer. Run it again if you add
 new ones.
@@ -247,6 +247,6 @@ Other commands:
 
 - `npm run check`, `npm run lint` and `npm run format` keep the code clean.
 - `npm run build` then `npm start` runs the production build.
-- `npm run bundle` makes `show-remote.tgz` for copying to a Pi.
+- `npm run bundle` makes `screen-remote.tgz` for copying to a Pi.
 - `npm run diff-api -- 192.168.0.50` compares a real processor's API with the Tessera profile.
   Run it after a Tessera update (see `shared/src/tessera/profiles/`).

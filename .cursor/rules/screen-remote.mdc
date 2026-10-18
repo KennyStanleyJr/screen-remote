@@ -1,14 +1,14 @@
 ---
-description: Core context, safety rules, and conventions for the Show Remote (screen-remote) project
+description: Core context, safety rules, and conventions for the Screen Remote (screen-remote) project
 alwaysApply: true
 ---
 
-# Show Remote - project rules
+# Screen Remote - project rules
 
 Full requirements live in `docs/PROJECT_BRIEF.md`. Read it before large changes.
 
 ## What this is
-A Raspberry Pi web server + phone PWA (served at `https://showremote.local`) for LED techs to
+A Raspberry Pi web server + phone PWA (served at `https://screenremote.local`) for LED techs to
 monitor and set up Brompton Tessera processors (mostly SX40 + XD boxes, ROE panels) on a venue
 network. Shows range from 1 processor to 20+. Processors are often, but not always, in failover pairs.
 

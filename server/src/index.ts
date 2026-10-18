@@ -40,7 +40,9 @@ const relockTimer = setInterval(() => {
 }, 15_000);
 
 const scheme = env.tls ? 'https' : 'http';
-console.log(`Show Remote listening on ${scheme}://${env.host}:${env.port} (data: ${env.dataDir})`);
+console.log(
+  `Screen Remote listening on ${scheme}://${env.host}:${env.port} (data: ${env.dataDir})`,
+);
 if (!store.state.pin) console.warn('No setup PIN configured. Run "npm run set-pin" to set one.');
 
 async function shutdown(): Promise<void> {

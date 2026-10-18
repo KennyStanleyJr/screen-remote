@@ -1,4 +1,4 @@
-# Show Remote - Project Brief
+# Screen Remote - Project Brief
 
 ## Purpose
 
@@ -19,7 +19,7 @@ without walking back to the processor rack or laptop.
 ```
 
 - A Raspberry Pi is plugged into the processor (management) network over ethernet and runs the server.
-- A WiFi router on the same network gives phones access. Phones open `https://showremote.local`
+- A WiFi router on the same network gives phones access. Phones open `https://screenremote.local`
   and install it as a PWA.
 - Optional, more isolated layout: router plugged into a second (USB) ethernet port on the Pi so phones
   can only reach the Pi. See `docs/SETUP.md`.

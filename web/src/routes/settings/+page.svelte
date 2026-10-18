@@ -334,7 +334,7 @@
   <section class="card pad stack">
     <h2>Phone setup</h2>
     <p class="muted small">
-      New phone? Install the Show Remote certificate once so the app opens securely, then use "Add
+      New phone? Install the Screen Remote certificate once so the app opens securely, then use "Add
       to Home Screen".
     </p>
     <a class="btn" href="/certs/rootCA.pem" download><Download size={16} /> Download certificate</a>

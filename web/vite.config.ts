@@ -10,8 +10,8 @@ export default defineConfig({
     SvelteKitPWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Show Remote',
-        short_name: 'Show Remote',
+        name: 'Screen Remote',
+        short_name: 'Screen Remote',
         description: 'Monitor and set up Brompton processors',
         theme_color: '#0e1013',
         background_color: '#0e1013',
