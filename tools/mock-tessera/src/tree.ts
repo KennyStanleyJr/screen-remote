@@ -50,17 +50,18 @@ export function createTree(o: MockOptions): Tree {
   const isSx40 = o.type === 'sx40' || o.type === 's8';
   const port = (signal: boolean, width: number, height: number, rate: number): Tree => ({
     'meta-data': {
-      'bit-depth': signal ? 10 : 0,
+      'bit-depth': signal ? 10 : -1,
       hdr: { format: 'standard-dynamic-range' },
-      'refresh-rate': signal ? rate : 0,
-      resolution: { height: signal ? height : 0, width: signal ? width : 0 },
+      'refresh-rate': signal ? rate : -1,
+      resolution: { height: signal ? height : -1, width: signal ? width : -1 },
       sampling: 'rgb',
     },
   });
+  // A real SX40 keys its ports from 0, while `port-number` stays 1-based.
   const ports: Tree = isSx40
     ? {
-        hdmi: { '1': port(o.hasInput, 3840, 2160, 59.94) },
-        sdi: { '1': port(o.hasInput, 1920, 1080, 59.94) },
+        hdmi: { '0': port(o.hasInput, 3840, 2160, 59.94) },
+        sdi: { '0': port(o.hasInput, 1920, 1080, 59.94) },
       }
     : {
         dvi: { '1': port(false, 0, 0, 0) },

@@ -16,6 +16,12 @@ import { asBool, asNum, asStr, fillPath, isTree, setAt, valueAt, type Tree } fro
 
 type Params = Record<string, string | number>;
 
+/** Input metadata reads -1 or 0 when there is no signal. */
+function positive(v: unknown): number | undefined {
+  const n = asNum(v);
+  return n !== undefined && n > 0 ? n : undefined;
+}
+
 /** One processor on the network: its client, last raw API data, and derived view. */
 export class Processor {
   readonly client: TesseraClient;
@@ -145,30 +151,50 @@ export class Processor {
     }
   }
 
-  /** Input ports the processor has, e.g. `hdmi/1`, `sdi/1`. */
-  inputPorts(): { type: string; number: number }[] {
+  /**
+   * Input ports the processor has. `number` is the 1-based value `input.activePortNumber` uses
+   * (SDI A = 1); `key` is the port's key under `input/ports/{type}/`, which SX40s number from 0.
+   */
+  inputPorts(): { type: string; number: number; key: string }[] {
     return this.itemKeys('input.ports').flatMap((type) => {
       const node = valueAt(this.raw, `input/ports/${type}`);
-      return isTree(node)
-        ? Object.keys(node)
-            .map(Number)
-            .filter(Number.isInteger)
-            .map((number) => ({ type: type.toLowerCase(), number }))
-        : [];
+      if (!isTree(node)) return [];
+      const keys = Object.keys(node).filter((k) => /^\d+$/.test(k));
+      const offset = keys.includes('0') ? 1 : 0;
+      return keys
+        .map((key) => ({ type: type.toLowerCase(), number: Number(key) + offset, key }))
+        .sort((a, b) => a.number - b.number);
     });
+  }
+
+  /** Path parameters for an input port's meta-data, or undefined if the processor lacks it. */
+  private portParams(type: string | undefined, number: number | undefined): Params | undefined {
+    if (!type || number === undefined) return undefined;
+    const ports = this.inputPorts();
+    if (!ports.length) return { portType: type, portNumber: number };
+    const port = ports.find((p) => p.type === type.toLowerCase() && p.number === number);
+    return port && { portType: port.type, portNumber: port.key };
+  }
+
+  private async loadPorts(): Promise<void> {
+    const ports = this.spec('input.ports');
+    if (!ports || this.portsLoaded) return;
+    await this.tryFetch(ports.path);
+    this.portsLoaded = true;
   }
 
   async pollSummary(profileOverride: string): Promise<void> {
     for (const path of this.profile.summaryReads) await this.fetchSubtree(path);
     this.serial = asStr(this.read('system.serial')) ?? this.serial;
     this.applyProfile(profileOverride);
+    await this.loadPorts();
 
-    const portType = asStr(this.read('input.activePortType'));
-    const portNumber = asNum(this.read('input.activePortNumber'));
+    const params = this.portParams(
+      asStr(this.read('input.activePortType')),
+      asNum(this.read('input.activePortNumber')),
+    );
     const meta = this.spec('input.portMetaData');
-    if (meta && portType && portNumber !== undefined) {
-      await this.tryFetch(fillPath(meta.path, { portType, portNumber }));
-    }
+    if (meta && params) await this.tryFetch(fillPath(meta.path, params));
   }
 
   onlineDevices(): number | undefined {
@@ -207,14 +233,10 @@ export class Processor {
         this.deviceListOnline = this.onlineDevices();
       }
     }
-    const ports = this.spec('input.ports');
     const meta = this.spec('input.portMetaData');
-    if (ports && !this.portsLoaded) {
-      await this.tryFetch(ports.path);
-      this.portsLoaded = true;
-    } else if (meta && includeSlow) {
+    if (meta && includeSlow) {
       for (const p of this.inputPorts()) {
-        await this.tryFetch(fillPath(meta.path, { portType: p.type, portNumber: p.number }));
+        await this.tryFetch(fillPath(meta.path, { portType: p.type, portNumber: p.key }));
       }
     }
     this.detailAt = Date.now();
@@ -246,10 +268,10 @@ export class Processor {
 
     const portType = asStr(r('input.activePortType'));
     const portNumber = asNum(r('input.activePortNumber'));
-    const portParams = portType && portNumber !== undefined ? { portType, portNumber } : undefined;
-    const width = portParams ? asNum(r('input.width', portParams)) : undefined;
-    const height = portParams ? asNum(r('input.height', portParams)) : undefined;
-    const refreshRate = portParams ? asNum(r('input.refreshRate', portParams)) : undefined;
+    const portParams = this.portParams(portType, portNumber);
+    const width = portParams ? positive(r('input.width', portParams)) : undefined;
+    const height = portParams ? positive(r('input.height', portParams)) : undefined;
+    const refreshRate = portParams ? positive(r('input.refreshRate', portParams)) : undefined;
 
     const role = asStr(r('failover.role'));
     const type = r('testPattern.type');
@@ -294,7 +316,7 @@ export class Processor {
             width,
             height,
             refreshRate,
-            bitDepth: portParams ? asNum(r('input.bitDepth', portParams)) : undefined,
+            bitDepth: portParams ? positive(r('input.bitDepth', portParams)) : undefined,
             hdrFormat: portParams ? asStr(r('input.hdrFormat', portParams)) : undefined,
             hasSignal: Boolean(width && height && refreshRate),
           }
@@ -380,10 +402,10 @@ export class Processor {
         .filter((p) => Number.isInteger(p.number))
         .sort((a, b) => a.number - b.number),
       inputs: ports.map((p) => {
-        const params = { portType: p.type, portNumber: p.number };
-        const width = asNum(r('input.width', params));
-        const height = asNum(r('input.height', params));
-        const refreshRate = asNum(r('input.refreshRate', params));
+        const params = { portType: p.type, portNumber: p.key };
+        const width = positive(r('input.width', params));
+        const height = positive(r('input.height', params));
+        const refreshRate = positive(r('input.refreshRate', params));
         const many = ports.filter((q) => q.type === p.type).length > 1;
         const suffix = !many
           ? ''
@@ -391,7 +413,8 @@ export class Processor {
             ? ` ${String.fromCharCode(64 + p.number)}`
             : ` ${p.number}`;
         return {
-          ...p,
+          type: p.type,
+          number: p.number,
           label: `${p.type.toUpperCase()}${suffix}`,
           hasSignal: Boolean(width && height && refreshRate),
           width,
