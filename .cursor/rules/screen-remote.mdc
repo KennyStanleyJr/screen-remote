@@ -1,0 +1,51 @@
+---
+description: Core context, safety rules, and conventions for the Show Remote (screen-remote) project
+alwaysApply: true
+---
+
+# Show Remote - project rules
+
+Full requirements live in `docs/PROJECT_BRIEF.md`. Read it before large changes.
+
+## What this is
+A Raspberry Pi web server + phone PWA (served at `https://showremote.local`) for LED techs to
+monitor and set up Brompton Tessera processors (mostly SX40 + XD boxes, ROE panels) on a venue
+network. Shows range from 1 processor to 20+. Processors are often, but not always, in failover pairs.
+
+## Hard safety rules (never weaken these)
+- **Show Mode blocks every write to processors at the server level** (HTTP 423). It is ON at boot.
+  Turning it ON needs no PIN; turning it OFF needs the setup PIN.
+- Only commands defined in `shared/src/commands.ts` may write to processors. Every write goes through
+  `server/src/commands.ts`, which validates against the active version profile's endpoint ranges.
+- Never add a raw "send any path/value" passthrough endpoint, even for debugging.
+- Destructive commands (failover request, reboot, frame capture/delete) need a confirm step in the UI.
+- Every command attempt (ok, error, or blocked) is written to the audit log.
+- Polling must stay light (Brompton warns heavy polling hurts processors): summary for all, detail
+  only for processors someone is viewing.
+
+## Tessera versions
+- API knowledge lives only in version profiles: `shared/src/tessera/profiles/`. Code elsewhere uses
+  logical endpoint keys (e.g. `testPattern.type`), never hard-coded paths.
+- New Tessera version: copy the nearest profile, adjust, register in `profiles/index.ts`.
+  Use `npm run diff-api -- <host>` against a real processor to see what changed.
+- Reference doc: `docs/brompton/TesseraIPControlAPI3_5_2_r2.pdf`. There is no per-panel control in 3.5.2.
+
+## Access model
+No user accounts. Anyone on the WiFi can view. One shared setup PIN unlocks a device session for
+commands and settings. Keep it that simple unless asked.
+
+## Stack and conventions
+- npm workspaces: `shared/` (types, profiles, commands), `server/` (Fastify, Node 20+),
+  `web/` (Svelte 5 + SvelteKit static SPA + `@vite-pwa/sveltekit`), `tools/mock-tessera/` (simulator).
+- TypeScript strict everywhere. Svelte 5 runes (`$state`, `$derived`, `$props`), no legacy stores.
+- ESLint (flat config) + Prettier must pass: run `npm run lint` and `npm run format:check`.
+- Persistence is plain JSON files in the data dir (no native DB deps).
+- Develop against the mock: `npm run dev` (mock + server + web, PIN `1234`).
+
+## UI style
+- Simple and intuitive for techs on a phone in a dark venue. Dark theme, high contrast.
+- Visual first: SVG illustrations (processors, XD boxes, failover pairs, walls) and pattern
+  thumbnails rather than walls of text. Icons from `@lucide/svelte`.
+- Clean and modern, not cheesy: small radii (`--radius: 4px`), thin borders, no pill-heavy UI,
+  no gradients-for-decoration, status colours used sparingly (ok / warn / fault).
+- Never use Brompton or ROE product photos or logos; draw our own line art.

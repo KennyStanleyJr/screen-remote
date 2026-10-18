@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+.svelte-kit/
+data/
+data-dev/
+certs/
+package-lock.json
+docs/brompton/
+web/static/icons/
+*.pdf

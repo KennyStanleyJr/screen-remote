@@ -1,0 +1,45 @@
+{
+  "name": "screen-remote",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Show Remote - monitor and set up Brompton Tessera processors from a phone",
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "server",
+    "web",
+    "tools/mock-tessera"
+  ],
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n mock,server,web -c gray,cyan,magenta \"npm run dev -w tools/mock-tessera\" \"npm run dev -w server\" \"npm run dev -w web\"",
+    "build": "npm run build -w web && npm run build -w server",
+    "start": "node server/dist/index.js",
+    "mock": "npm run start -w tools/mock-tessera",
+    "set-pin": "npm run set-pin -w server",
+    "diff-api": "npm run diff-api -w server --",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run check -w web && tsc -p shared && tsc -p server && tsc -p tools/mock-tessera",
+    "icons": "npm run icons -w web",
+    "bundle": "node scripts/bundle.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.5",
+    "concurrently": "^10.0.6",
+    "eslint": "^10.13.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-svelte": "^3.23.1",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10",
+    "prettier-plugin-svelte": "^4.1.1",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.2"
+  }
+}

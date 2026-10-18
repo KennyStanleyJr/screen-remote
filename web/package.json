@@ -1,0 +1,28 @@
+{
+  "name": "@screen-remote/web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "icons": "pwa-assets-generator"
+  },
+  "devDependencies": {
+    "@lucide/svelte": "^1.59.0",
+    "@screen-remote/server": "^0.1.0",
+    "@screen-remote/shared": "^0.1.0",
+    "@sveltejs/adapter-static": "^3.0.10",
+    "@sveltejs/kit": "^2.70.3",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@trpc/client": "^11.19.0",
+    "@vite-pwa/assets-generator": "^1.0.4",
+    "@vite-pwa/sveltekit": "^1.1.0",
+    "svelte": "^5.57.2",
+    "svelte-check": "^4.7.7",
+    "vite": "^8.3.4",
+    "vite-plugin-pwa": "^2.0.0"
+  }
+}

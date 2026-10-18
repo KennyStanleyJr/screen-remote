@@ -1,0 +1,27 @@
+{
+  "name": "@screen-remote/server",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    "./router": "./src/router.ts"
+  },
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false src/index.ts --dev",
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "set-pin": "tsx src/cli/set-pin.ts",
+    "diff-api": "tsx src/cli/diff-api.ts"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.1.3",
+    "@fastify/static": "^10.1.6",
+    "@screen-remote/shared": "^0.1.0",
+    "@trpc/server": "^11.19.0",
+    "fastify": "^5.12.7",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "tsup": "^9.0.0"
+  }
+}
