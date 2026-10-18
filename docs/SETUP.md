@@ -60,6 +60,7 @@ Do this at the shop, where the Pi has internet. It takes about 10 to 15 minutes.
 In **Raspberry Pi Imager**, choose your Pi model and **Raspberry Pi OS Lite (64-bit)**. Before
 writing, open the settings (**Edit settings** or the gear icon) and:
 
+- Set the **hostname** to `showremote`, so the Pi is `showremote.local` from the first boot.
 - Set a **username and password** (for example `tech`).
 - Set up **Wi-Fi** for your shop network, so the Pi has internet for the install.
 - On the **Services** tab, **enable SSH** with password authentication.
@@ -72,16 +73,16 @@ On your laptop, in the project folder:
 
 ```bash
 npm run bundle
-scp show-remote.tgz tech@raspberrypi.local:~
+scp show-remote.tgz tech@showremote.local:~
 ```
 
-Use the username you chose. If `raspberrypi.local` isn't found, use the Pi's IP address from your
+Use the username you chose. If `showremote.local` isn't found, use the Pi's IP address from your
 router's client list.
 
 ### 3. Run the installer
 
 ```bash
-ssh tech@raspberrypi.local
+ssh tech@showremote.local
 mkdir -p ~/screen-remote && tar -xzf ~/show-remote.tgz -C ~/screen-remote
 cd ~/screen-remote
 sudo bash scripts/install-pi.sh
@@ -90,7 +91,7 @@ sudo bash scripts/install-pi.sh
 The installer:
 
 - Installs Node.js and the system packages it needs, then builds the app.
-- Renames the Pi to `showremote`, so it is reachable at `showremote.local`.
+- Makes sure the Pi is named `showremote` (it renames it if you skipped that in Imager).
 - Adds the fixed ethernet addresses (see above).
 - Makes the HTTPS certificate.
 - Asks you to choose the **setup PIN** (4 to 8 digits). Write it down somewhere safe.
@@ -104,7 +105,8 @@ The installer:
 sudo reboot
 ```
 
-After the reboot, SSH back in with `ssh tech@showremote.local` and check:
+This applies the fixed ethernet addresses. After the reboot, SSH back in with
+`ssh tech@showremote.local` and check:
 
 ```bash
 systemctl status show-remote   # should say "active (running)"
