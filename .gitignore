@@ -6,6 +6,7 @@ data/
 data-dev/
 certs/
 screen-remote.tgz
+screen-remote-update.tgz
 *.log
 .env
 .env.*

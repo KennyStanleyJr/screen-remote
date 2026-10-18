@@ -148,10 +148,54 @@ cd ~/screen-remote && git pull && sudo bash scripts/install-pi.sh
 Your PIN, certificates, processor names and settings are kept. Reload the app on each phone
 afterwards; an installed app picks up the new version the next time it opens.
 
-**No internet at the Pi?** On your laptop run `npm run bundle` and
-`scp screen-remote.tgz tech@screenremote.local:~`, then on the Pi run
-`tar -xzf ~/screen-remote.tgz -C ~/screen-remote` and the installer as above. The installer
-itself still needs internet the first time, to download Node.js and packages.
+### Updating without internet at the Pi
+
+On a show network the Pi usually has no internet, so `git pull` and the installer can't run. You
+can still copy a new version over from your laptop. The laptop builds the app, so the Pi doesn't
+need to download anything. This works for code changes only: if a change adds or updates an npm
+package, update at the shop with internet instead.
+
+You need the repo on your laptop with `npm install` done once, and the laptop on the same network
+as the Pi (for example on the show Wi-Fi).
+
+1. **On the laptop**, in the repo folder, build and package the app:
+
+   ```bash
+   npm run bundle:update
+   ```
+
+   This makes `screen-remote-update.tgz` (a few hundred KB).
+
+2. **Still on the laptop**, copy it to the Pi. It asks for the Pi's password:
+
+   ```bash
+   scp screen-remote-update.tgz tech@screenremote.local:~
+   ```
+
+   If `screenremote.local` isn't found, use `tech@192.168.0.250` or `tech@192.168.1.250`.
+
+3. **On the Pi** (`ssh tech@screenremote.local`), swap in the new version and restart:
+
+   ```bash
+   sudo rm -rf /opt/screen-remote/server/dist /opt/screen-remote/web/build
+   sudo tar --no-same-owner -xzmf ~/screen-remote-update.tgz -C /opt/screen-remote
+   sudo systemctl restart screen-remote
+   systemctl status screen-remote --no-pager
+   ```
+
+   The status should say **active (running)**. Screen Remote comes back up in Show Mode within a
+   few seconds.
+
+4. Reload the app on each phone. An installed app picks up the new version the next time it opens.
+
+Your PIN, certificates, processor names and settings are kept.
+
+This updates the running app only. The source in `~/screen-remote` on the Pi stays at the old
+version until the Pi next has internet. Then run `git pull` and the installer as usual. Don't run
+the installer before pulling, or it rebuilds the old code and undoes the update.
+
+The Pi has no clock battery and sets its time from the internet, so on a show network its clock
+can be off. That only affects timestamps in the logs.
 
 ### Useful commands
 
@@ -249,6 +293,8 @@ Other commands:
 
 - `npm run check`, `npm run lint` and `npm run format` keep the code clean.
 - `npm run build` then `npm start` runs the production build.
-- `npm run bundle` makes `screen-remote.tgz` for copying to a Pi.
+- `npm run bundle` makes `screen-remote.tgz` (the source) for copying to a Pi.
+- `npm run bundle:update` builds the app and makes `screen-remote-update.tgz`, for updating a Pi
+  without internet (see "Updating without internet at the Pi").
 - `npm run diff-api -- 192.168.0.50` compares a real processor's API with the Tessera profile.
   Run it after a Tessera update (see `shared/src/tessera/profiles/`).

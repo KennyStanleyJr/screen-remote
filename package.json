@@ -26,7 +26,8 @@
     "format:check": "prettier --check .",
     "check": "npm run check -w web && tsc -p shared && tsc -p server && tsc -p tools/mock-tessera",
     "icons": "npm run icons -w web",
-    "bundle": "node scripts/bundle.mjs"
+    "bundle": "node scripts/bundle.mjs",
+    "bundle:update": "npm run build && node scripts/bundle.mjs --built"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
